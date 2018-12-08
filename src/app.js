@@ -5,13 +5,17 @@ import './app.css';
 import Board from './board';
 import { State, StateError } from './game';
 
+const players = {
+    'Human': null,
+};
+
 class App extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            'Player 1': 'human',
-            'Player 2': 'human',
+            'Player 1': 'Human',
+            'Player 2': 'Human',
             gameState: new State(),
             errorMessage: '',
             X: 'Player 1',
@@ -20,22 +24,47 @@ class App extends Component {
         };
     }
 
+    getCurrentPlayer(state) {
+        return players[state[state[state.gameState.turn]]];
+    }
+
     handleCellClick = (i, j) => {
         this.setState((old) => {
-            if (old[old[old.gameState.turn]] !== 'human') {
+            if (this.getCurrentPlayer(old)) {
                 return {};
             }
-            try {
-                return {
-                    gameState: old.gameState.play(i, j),
-                    errorMessage: '',
-                };
-            } catch (e) {
-                if (e instanceof StateError) {
-                    return {errorMessage: e.message};
-                }
-            }
+            return this.getPlayNextState(old, i, j);
         });
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        const s = this.state;
+        if (prevState.gameState !== s.gameState &&
+            !this.state.gameState.ended
+        ) {
+            const player = this.getCurrentPlayer(this.state);
+            if (player) {
+                const next = player(this.state.gameState);
+                this.play(...next)
+            }
+        }
+    }
+
+    getPlayNextState(old, i, j) {
+        try {
+            return {
+                gameState: old.gameState.play(i, j),
+                errorMessage: '',
+            };
+        } catch (e) {
+            if (e instanceof StateError) {
+                return {errorMessage: e.message};
+            }
+        }
+    }
+
+    play = (i, j) => {
+        this.setState(old => this.getPlayNextState(old, i, j));
     }
 
     reset = () => {
