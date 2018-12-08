@@ -1,0 +1,29 @@
+.Board {
+    display: inline-grid;
+    grid-template-columns: 1em 1em 1em;
+    grid-auto-rows: 1em;
+    font-size: 4em;
+    column-gap: .2ex;
+    row-gap: .2ex;
+    border: .2ex solid var(--border-color);
+    background-color: var(--border-color);
+    border-radius: .2ex;
+}
+
+.Board__cell {
+    line-height: 1em;
+    text-align: center;
+    border-radius: .1ex;
+}
+
+/* THEME */
+
+.Board {
+    --border-color: #444;
+    --cell-color: #EEE;
+}
+
+.Board__cell {
+    background: var(--cell-color);
+    color: var(--border-color);
+}
