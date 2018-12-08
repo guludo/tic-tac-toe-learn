@@ -74,7 +74,10 @@ class State {
                 if (this.board[i][j]) {
                     continue;
                 }
-                r.push(this.play(i, j));
+                r.push({
+                    playArgs: [i, j],
+                    state: this.play(i, j),
+                });
             }
         }
         return r;
