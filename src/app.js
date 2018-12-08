@@ -4,9 +4,11 @@ import './app.css';
 
 import Board from './board';
 import { State, StateError } from './game';
+import randomPlayer from './random-player';
 
 const players = {
     'Human': null,
+    'Random Player': randomPlayer,
 };
 
 class App extends Component {
@@ -15,7 +17,7 @@ class App extends Component {
 
         this.state = {
             'Player 1': 'Human',
-            'Player 2': 'Human',
+            'Player 2': 'Random Player',
             gameState: new State(),
             errorMessage: '',
             X: 'Player 1',
