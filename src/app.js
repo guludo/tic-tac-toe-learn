@@ -13,7 +13,9 @@ const players = {
     'Random Player': () => randomPlayer,
     'Random Greedy Player': () => randomGreedyPlayer,
     'Simple Learner': () => new SimpleLearner({}),
+    'Simple Mirrored Learner': () => new SimpleLearner({mirrored: true}),
     'Simple Greedy Learner': () => new SimpleLearner({greedy: true}),
+    'Simple Greedy Mirrored Learner': () => new SimpleLearner({greedy: true, mirrored: true}),
 };
 
 class App extends Component {
