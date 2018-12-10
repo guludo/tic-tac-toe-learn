@@ -50,8 +50,16 @@ class App extends Component {
                     let p = i % 2;
                     while (!gameState.ended) {
                         const playArgs = this.players[p].play(gameState);
+                        const oldGameState = gameState;
+
                         gameState = gameState.play(...playArgs);
+
                         p = (p + 1) % 2;
+
+                        const op = this.players[p];
+                        if (op && op.onOponentPlay) {
+                            op.onOponentPlay(oldGameState, playArgs);
+                        }
                     }
                     if (gameState.winner) {
                         p = i % 2;
@@ -110,6 +118,10 @@ class App extends Component {
 
     getCurrentPlayer(state) {
         return this.players[state[state.gameState.turn]];
+    }
+
+    getOponentPlayer(state) {
+        return this.players[state[state.gameState.turn === 'X' ? 'Y' : 'X']];
     }
 
     firePlayerEvent(state, alias, eventName, ...args) {
@@ -185,6 +197,10 @@ class App extends Component {
 
     getPlayNextState(old, i, j) {
         try {
+            const op = this.getOponentPlayer(old);
+            if (op && op.onOponentPlay) {
+                op.onOponentPlay(old.gameState, [i, j]);
+            }
             return {
                 gameState: old.gameState.play(i, j),
                 errorMessage: '',
