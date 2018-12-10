@@ -31,6 +31,13 @@ class App extends Component {
         return players[state[state[state.gameState.turn]]];
     }
 
+    firePlayerEvent(state, alias, eventName, ...args) {
+        const player = players[state[alias]];
+        if (player && player[eventName]) {
+            player[eventName].apply(player, args);
+        }
+    }
+
     handleCellClick = (i, j) => {
         this.setState((old) => {
             if (this.getCurrentPlayer(old) || old.playerThinking) {
@@ -52,6 +59,11 @@ class App extends Component {
                     this.setState({playerThinking: false});
                 }, 100);
             }
+        }
+
+        if (s.gameState.ended && !prevState.gameState.ended) {
+            this.firePlayerEvent(s, 'Player 1', 'onGameEnded', s.gameState);
+            this.firePlayerEvent(s, 'Player 2', 'onGameEnded', s.gameState);
         }
 
         if (s.gameState.ended && s.autoReset) {
