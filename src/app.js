@@ -41,9 +41,7 @@ class App extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         const s = this.state;
-        if (prevState.gameState !== s.gameState &&
-            !this.state.gameState.ended
-        ) {
+        if (!s.gameState.ended) {
             const player = this.getCurrentPlayer(this.state);
             if (player) {
                 const next = player(this.state.gameState);
@@ -78,9 +76,32 @@ class App extends Component {
         });
     }
 
+    handlePlayerChange = (alias, e) => {
+        this.setState({[alias]: e.target.value});
+    }
+
     render() {
         const s = this.state;
         return <div className="App">
+            <div>
+                Player 1: <select
+                    value={s['Player 1']}
+                    onChange={this.handlePlayerChange.bind(this, 'Player 1')}
+                >{
+                    Object.keys(players).map(
+                        k => <option key={k} value={k}>{k}</option>
+                    )
+                }</select>
+                <br/>
+                Player 2: <select
+                    value={s['Player 2']}
+                    onChange={this.handlePlayerChange.bind(this, 'Player 2')}
+                >{
+                    Object.keys(players).map(
+                        k => <option key={k} value={k}>{k}</option>
+                    )
+                }</select>
+            </div>
             <Board
                 state={s.gameState.board}
                 onCellClick={this.handleCellClick}
