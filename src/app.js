@@ -24,6 +24,10 @@ class App extends Component {
             O: 'Player 2',
             playerThinking: false,
             autoReset: false,
+            stats: {
+                'Player 1': {'wins': 0, 'losses': 0, 'draws': 0},
+                'Player 2': {'wins': 0, 'losses': 0, 'draws': 0},
+            },
         };
 
         this.players = {
@@ -78,6 +82,16 @@ class App extends Component {
         if (s.gameState.ended && !prevState.gameState.ended) {
             this.firePlayerEvent(s, 'Player 1', 'onGameEnded', s.gameState);
             this.firePlayerEvent(s, 'Player 2', 'onGameEnded', s.gameState);
+
+            const stats = {...s.stats};
+            if (s.gameState.winner) {
+                stats[s[s.gameState.winner]].wins += 1;
+                stats[s[s.gameState.winner === 'X' ? 'O' : 'X']].losses += 1;
+            } else {
+                stats['Player 1'].draws += 1;
+                stats['Player 2'].draws += 1;
+            }
+            this.setState({stats});
         }
 
         if (s.gameState.ended && s.autoReset) {
@@ -110,6 +124,13 @@ class App extends Component {
                 O: old.O === 'Player 1' ? 'Player 2' : 'Player 1',
             };
         });
+    }
+
+    resetStats = () => {
+        this.setState({stats: {
+            'Player 1': {'wins': 0, 'losses': 0, 'draws': 0},
+            'Player 2': {'wins': 0, 'losses': 0, 'draws': 0},
+        }});
     }
 
     handlePlayerChange = (alias, e) => {
@@ -167,6 +188,31 @@ class App extends Component {
                     checked={s.autoReset}
                     onChange={this.handleAutoResetChange}
                 /> Reset automatically</label>
+            </div>
+            <div>
+                Stats:
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th><th>Wins</th><th>Draws</th><th>Losses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>Player 1</th>
+                            <td>{s.stats['Player 1'].wins}</td>
+                            <td>{s.stats['Player 1'].draws}</td>
+                            <td>{s.stats['Player 1'].losses}</td>
+                        </tr>
+                        <tr>
+                            <th>Player 2</th>
+                            <td>{s.stats['Player 2'].wins}</td>
+                            <td>{s.stats['Player 2'].draws}</td>
+                            <td>{s.stats['Player 2'].losses}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button onClick={this.resetStats}>Reset Stats</button>
             </div>
             {s.errorMessage && <div>{s.errorMessage}</div>}
         </div>;
