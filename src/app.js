@@ -5,10 +5,13 @@ import './app.css';
 import Board from './board';
 import { State, StateError } from './game';
 import randomPlayer from './random-player';
+import SimpleLearner from './simple-learner';
 
 const players = {
     'Human': () => null,
     'Random Player': () => randomPlayer,
+    'Simple Learner': () => new SimpleLearner({}),
+    'Simple Greedy Learner': () => new SimpleLearner({greedy: true}),
 };
 
 class App extends Component {
