@@ -7,8 +7,8 @@ import { State, StateError } from './game';
 import randomPlayer from './random-player';
 
 const players = {
-    'Human': null,
-    'Random Player': randomPlayer,
+    'Human': () => null,
+    'Random Player': () => randomPlayer,
 };
 
 class App extends Component {
@@ -25,14 +25,20 @@ class App extends Component {
             playerThinking: false,
             autoReset: false,
         };
+
+        this.players = {
+            'Player 1': players[this.state['Player 1']](),
+            'Player 2': players[this.state['Player 2']](),
+        };
+
     }
 
     getCurrentPlayer(state) {
-        return players[state[state[state.gameState.turn]]];
+        return this.players[state[state.gameState.turn]];
     }
 
     firePlayerEvent(state, alias, eventName, ...args) {
-        const player = players[state[alias]];
+        const player = this.players[alias];
         if (player && player[eventName]) {
             player[eventName].apply(player, args);
         }
@@ -49,6 +55,14 @@ class App extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         const s = this.state;
+
+        /* This for statement needs to be run before calling getCurrentPlayer */
+        for (let alias of ['Player 1', 'Player 2']) {
+            if (s[alias] !== prevState[alias]) {
+                this.players[alias] = players[s[alias]]();
+            }
+        }
+
         if (!s.gameState.ended && !s.playerThinking) {
             const player = this.getCurrentPlayer(this.state);
             if (player) {
