@@ -31,6 +31,7 @@ class App extends Component {
                 'Player 1': {'wins': 0, 'losses': 0, 'draws': 0},
                 'Player 2': {'wins': 0, 'losses': 0, 'draws': 0},
             },
+            trainingMode: false,
         };
 
         this.players = {
@@ -38,6 +39,71 @@ class App extends Component {
             'Player 2': players[this.state['Player 2']](),
         };
 
+        this.trainer = {
+            timeoutId: null,
+            running: false,
+            batchRunner() {
+                for (let i = 0; i < 100; i++) {
+                    let gameState = new State();
+                    let p = i % 2;
+                    while (!gameState.ended) {
+                        const playArgs = this.players[p].play(gameState);
+                        gameState = gameState.play(...playArgs);
+                        p = (p + 1) % 2;
+                    }
+                    if (gameState.winner) {
+                        p = i % 2;
+                        if (gameState.winner !== 'X') {
+                            p = (p + 1) % 2;
+                        }
+                        this.stats[p].wins += 1;
+                        this.stats[(p + 1) % 2].losses += 1;
+                    } else {
+                        this.stats[0].draws += 1;
+                        this.stats[1].draws += 1;
+                    }
+                }
+
+                if (this.onBatchDone) {
+                    this.onBatchDone();
+                }
+
+                if (this.enabled) {
+                    setTimeout(this.batchRunner, 10);
+                } else {
+                    this.running = false;
+                }
+            },
+            start(player1, player2) {
+                if (this.running) {
+                    return;
+                }
+                this.players = [player1, player2];
+                this.stats = [
+                    {'wins': 0, 'losses': 0, 'draws': 0},
+                    {'wins': 0, 'losses': 0, 'draws': 0},
+                ];
+                this.running = true;
+                this.enabled = true;
+                this.batchRunner();
+            },
+            stop() {
+                this.enabled = false;
+            },
+        };
+        this.trainer.batchRunner = this.trainer.batchRunner.bind(this.trainer);
+
+        this.trainer.onBatchDone = () => {
+            this.setState(s => {
+                const stats = {...s.stats};
+                for (let [i, alias] of [[0, 'Player 1'], [1, 'Player 2']]) {
+                    for (let k of ['wins', 'draws', 'losses']) {
+                        stats[alias][k] += this.trainer.stats[i][k];
+                    }
+                }
+                return {stats};
+            });
+        };
     }
 
     getCurrentPlayer(state) {
@@ -53,6 +119,9 @@ class App extends Component {
 
     handleCellClick = (i, j) => {
         this.setState((old) => {
+            if (old.trainingMode) {
+                return {};
+            }
             if (this.getCurrentPlayer(old) || old.playerThinking) {
                 return {};
             }
@@ -62,6 +131,16 @@ class App extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         const s = this.state;
+
+        if (s.trainingMode) {
+            if (!this.trainer.running) {
+                this.trainer.start(this.players['Player 1'], this.players['Player 2']);
+            }
+            return;
+        } else if (this.trainer.running) {
+            this.trainer.stop();
+            return;
+        }
 
         /* This for statement needs to be run before calling getCurrentPlayer */
         for (let alias of ['Player 1', 'Player 2']) {
@@ -119,14 +198,16 @@ class App extends Component {
         this.setState(old => this.getPlayNextState(old, i, j));
     }
 
+    getResetStateUpdate(old) {
+        return {
+            gameState: new State(),
+            X: old.X === 'Player 1' ? 'Player 2' : 'Player 1',
+            O: old.O === 'Player 1' ? 'Player 2' : 'Player 1',
+        };
+    }
+
     reset = () => {
-        this.setState((old) => {
-            return {
-                gameState: new State(),
-                X: old.X === 'Player 1' ? 'Player 2' : 'Player 1',
-                O: old.O === 'Player 1' ? 'Player 2' : 'Player 1',
-            };
-        });
+        this.setState(this.getResetStateUpdate);
     }
 
     resetStats = () => {
@@ -142,6 +223,20 @@ class App extends Component {
 
     handleAutoResetChange = (e) => {
         this.setState({autoReset: e.target.checked});
+    }
+
+    handleTrainingModeChange = (e) => {
+        const trainingMode = e.target.checked;
+        this.setState(old => {
+            if (!this.players['Player 1'] || !this.players['Player 2']) {
+                return {};
+            }
+            const r = {trainingMode};
+            if (r.trainingMode) {
+                Object.assign(r, this.getResetStateUpdate(old))
+            }
+            return r;
+        });
     }
 
     render() {
@@ -191,6 +286,13 @@ class App extends Component {
                     checked={s.autoReset}
                     onChange={this.handleAutoResetChange}
                 /> Reset automatically</label>
+            </div>
+            <div>
+                <label><input
+                    type='checkbox'
+                    checked={s.trainingMode}
+                    onChange={this.handleTrainingModeChange}
+                /> Training mode</label>
             </div>
             <div>
                 Stats:
