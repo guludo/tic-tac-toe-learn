@@ -170,7 +170,7 @@ class App extends Component {
             if (player) {
                 this.setState({playerThinking: true});
                 setTimeout(() => {
-                    const next = player.play(this.state.gameState);
+                    const next = player.play(s.gameState);
                     this.play(...next);
                     this.setState({playerThinking: false});
                 }, 100);
