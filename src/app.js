@@ -22,7 +22,6 @@ class App extends Component {
             errorMessage: '',
             X: 'Player 1',
             O: 'Player 2',
-            starter: 'Player 1',
         };
     }
 
@@ -71,7 +70,8 @@ class App extends Component {
         this.setState((old) => {
             return {
                 gameState: new State(),
-                starter: old.starter === 'Player 1' ? 'Player 2' : 'Player 1',
+                X: old.X === 'Player 1' ? 'Player 2' : 'Player 1',
+                O: old.O === 'Player 1' ? 'Player 2' : 'Player 1',
             };
         });
     }
