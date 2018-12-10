@@ -42,6 +42,17 @@ class State {
         this.ended = !!this.winner || this.tied;
     }
 
+    hash() {
+        let s = '';
+        for (let row of this.board) {
+            for (let cell of row) {
+                s += cell + '|';
+            }
+        }
+        s += this.turn;
+        return s;
+    }
+
     play(i, j) {
         if (this.winner || this.tied) {
             throw new StateError('game already ended');
