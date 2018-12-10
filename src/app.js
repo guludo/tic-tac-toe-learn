@@ -22,6 +22,7 @@ class App extends Component {
             errorMessage: '',
             X: 'Player 1',
             O: 'Player 2',
+            playerThinking: false,
         };
     }
 
@@ -31,7 +32,7 @@ class App extends Component {
 
     handleCellClick = (i, j) => {
         this.setState((old) => {
-            if (this.getCurrentPlayer(old)) {
+            if (this.getCurrentPlayer(old) || old.playerThinking) {
                 return {};
             }
             return this.getPlayNextState(old, i, j);
@@ -40,11 +41,15 @@ class App extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         const s = this.state;
-        if (!s.gameState.ended) {
+        if (!s.gameState.ended && !s.playerThinking) {
             const player = this.getCurrentPlayer(this.state);
             if (player) {
-                const next = player(this.state.gameState);
-                this.play(...next)
+                this.setState({playerThinking: true});
+                setTimeout(() => {
+                    const next = player(this.state.gameState);
+                    this.play(...next);
+                    this.setState({playerThinking: false});
+                }, 100);
             }
         }
     }
