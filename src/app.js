@@ -23,6 +23,7 @@ class App extends Component {
             X: 'Player 1',
             O: 'Player 2',
             playerThinking: false,
+            autoReset: false,
         };
     }
 
@@ -51,6 +52,10 @@ class App extends Component {
                     this.setState({playerThinking: false});
                 }, 100);
             }
+        }
+
+        if (s.gameState.ended && s.autoReset) {
+            this.reset();
         }
     }
 
@@ -83,6 +88,10 @@ class App extends Component {
 
     handlePlayerChange = (alias, e) => {
         this.setState({[alias]: e.target.value});
+    }
+
+    handleAutoResetChange = (e) => {
+        this.setState({autoReset: e.target.checked});
     }
 
     render() {
@@ -126,6 +135,13 @@ class App extends Component {
                     <button onClick={this.reset}>Reset</button>
                 </div>
             </React.Fragment>}
+            <div>
+                <label><input
+                    type='checkbox'
+                    checked={s.autoReset}
+                    onChange={this.handleAutoResetChange}
+                /> Reset automatically</label>
+            </div>
             {s.errorMessage && <div>{s.errorMessage}</div>}
         </div>;
     }
