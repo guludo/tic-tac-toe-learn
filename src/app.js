@@ -47,7 +47,7 @@ class App extends Component {
             timeoutId: null,
             running: false,
             batchRunner() {
-                for (let i = 0; i < 100; i++) {
+                for (let i = 0; i < 1000; i++) {
                     let gameState = new State();
                     let p = i % 2;
                     while (!gameState.ended) {
