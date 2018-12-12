@@ -31,7 +31,7 @@ class Player {
         let pArray = [];
         for (let c of candidates) {
             const p = this.getProbs(state, c.playArgs);
-            const score = .000000001 + p.win + p.draw;
+            const score = .000000001 + 4 * p.win + p.draw;
             pArray.push(score);
             t += score;
         }
